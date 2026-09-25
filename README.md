@@ -32,9 +32,9 @@ flowchart LR
     end
     U <-- "TCP" --> E
     E -- "/distance" --> C
-    F -. "/distance (alternative source)" .-> C
+    F -. "/distance (stand-in for Unity)" .-> C
     C -- "/cmd_vel" --> E
-    C -. "/cmd_vel (until the Unity scene exists)" .-> M
+    C -. "/cmd_vel (stand-in for Unity)" .-> M
 ```
 
 - **Distance source** publishes readings on `/distance` (`sensor_msgs/Range`). There are two interchangeable sources behind the same topic and message type: a fake Python node that generates synthetic readings, and the Unity scene.
