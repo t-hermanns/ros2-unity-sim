@@ -6,9 +6,12 @@ The scenario itself is deliberately simple. The point of the project is the comm
 
 ## Status
 
-**Design phase. There is no code in this repository yet.** This README describes the intended design and the decisions made so far. It will be updated as parts are actually built.
+**Early development.** The first node is in place; the rest of this README describes the intended design and the decisions made so far. It will be updated as parts are actually built.
 
-- [ ] Python nodes: fake distance source, speed controller, mock actuator
+- [ ] Python nodes (package `speed_control`)
+  - [x] Fake distance source (`fake_distance_node`)
+  - [ ] Speed controller
+  - [ ] Mock actuator
 - [ ] Unity scene connected through the ROS–TCP bridge
 - [ ] Defined behaviour when the distance source stops publishing
 - [ ] One node ported to C++
