@@ -11,8 +11,7 @@ The scenario itself is deliberately simple. The point of the project is the comm
 - [x] Fake distance source (`fake_distance_node`, Python)
 - [ ] Mock actuator that logs velocity commands
 - [ ] Watchdog: detect missing sensor data (timer or QoS deadline/liveliness)
-- [ ] Speed controller as an explicit state machine:
-      NORMAL → DEGRADED → SAFE_STOP → RECOVERY
+- [ ] Speed controller as an explicit state machine (NORMAL, DEGRADED, SAFE_STOP, RECOVERY)
 - [ ] Unit tests for all state transitions
 - [ ] Launch test: stop the sensor, verify speed drops to 0 within the deadline
 - [ ] CI with `colcon test` in a `ros:jazzy` container
@@ -48,12 +47,27 @@ flowchart LR
 - **Actuator** is the simulated robot in Unity. Until the scene exists, a mock node logs the commands instead.
 - **ROS–TCP endpoint**: Unity does not speak DDS. It connects over TCP to an endpoint node on the ROS 2 side, which republishes messages into the ROS 2 graph.
 
+### Planned controller states
+
+```mermaid
+stateDiagram-v2
+    [*] --> NORMAL
+    NORMAL --> DEGRADED: reading late
+    DEGRADED --> NORMAL: readings on time again
+    DEGRADED --> SAFE_STOP: no reading for too long
+    SAFE_STOP --> RECOVERY: readings resume
+    RECOVERY --> NORMAL: enough good readings
+    RECOVERY --> SAFE_STOP: reading lost again
+```
+
+This is a first draft. The exact limits behind "late", "too long" and "enough" are still open (see below). Stopping in front of an obstacle is not a state of its own: it is part of the speed rule in NORMAL.
+
 ## Decisions so far
 
 | Decision | Alternative | Reason |
 |---|---|---|
 | ROS 2 Jazzy | Humble, newer releases | Current LTS with support until 2029 and mature tooling |
-| Python (rclpy) first, one node in C++ later | Everything in C++ | Learn the ROS 2 concepts without fighting the language at the same time; use C++ where it makes a difference |
+| Python (rclpy) first, the state machine in C++ later | Everything in C++ | Learn the ROS 2 concepts without fighting the language at the same time; use C++ where it makes a difference |
 | Port the controller's state machine to C++ | Port another node | It is the safety-relevant logic, and as a class without ROS dependencies it can be unit-tested in isolation |
 | Explicit state machine in the controller | Ad-hoc timeout checks | Every reaction to missing data is a named state with defined transitions, so it can be tested and drawn as a diagram |
 | Unity as simulator | Raspberry Pi with a real sensor | No hardware dependency, and scenarios can be repeated exactly |
